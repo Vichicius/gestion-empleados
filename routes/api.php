@@ -17,7 +17,11 @@ use App\Http\Controllers\UsuariosController as controladorUsuarios;
 */
 
 Route::middleware(["validar_permiso"])->group(function () {
-    Route::get('users/login', [controladorUsuarios::class, 'register']);
-    Route::get('users/registrar', [controladorUsuarios::class, 'login']);
+    Route::prefix('users')->group(function(){
+        Route::get('login', [controladorUsuarios::class, 'register']);
+        Route::get('register', [controladorUsuarios::class, 'login'])->withoutMiddleware("validar_permiso"); //quitar la validacion del middleware
+        Route::get('forgot-password', [controladorUsuarios::class, 'passRecovery'])->withoutMiddleware("validar_permiso");
+    });
+
 });
 

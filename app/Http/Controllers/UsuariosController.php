@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use app\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UsuariosController extends Controller
 {
@@ -55,6 +56,7 @@ class UsuariosController extends Controller
                 $user->save();
                 $response["status"] = 1;
                 $response["msg"] = "sesion iniciada";
+                $response["user"] = $user;
             }else{
                 $response["status"] = 0;
                 $response["msg"] = "Contraseña incorrecta";
@@ -63,8 +65,37 @@ class UsuariosController extends Controller
             $response["status"] = 0;
             $response["msg"] = "No se encuentra el email";
         }
+        return $response;
 
         
+    }
+
+    public function passRecovery(Request $req){
+        $jdata = $req->getContent();
+        $data = json_decode($jdata);
+        
+        /*me pasa el email
+        pillo el usuario
+        le cambio la contraseña a un hash aleatorio
+        guardo la pass
+        se la envio por email
+        */
+
+        $user = User::where('email',$data->email);
+        if($user){
+            $newPass = Str::random(16);
+            $user->password = Hash::create($newPass);
+            $user->save();
+            $response["status"] = 1;
+            $response["msg"] = "Se ha cambiado la contraseña";
+            $response["contenido del email"] = "La contraseña es: ".$newPass;
+
+        }else{
+            $response["status"] = 0;
+            $response["msg"] = "No se encuentra el email";
+        }
+        return $response;
+
     }
     
 }
