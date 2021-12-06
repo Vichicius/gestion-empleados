@@ -25,8 +25,8 @@ class checkUserProfile
         */
         $response = "";
         try{
-            $user = User::where('api_token')->first();
-            switch ($user->puesto) {
+            $userMiddleware = User::where('api_token')->first();
+            switch ($userMiddleware->puesto) {
                 case 'empleado':
                     $permiso = 1;
                     break;
@@ -41,7 +41,7 @@ class checkUserProfile
                     break;
             }
             if($permiso>=2){
-                return $next($user,$permiso);
+                return $next($userMiddleware,$permiso);
             }else{
                 $response["status"] = 0;
                 $response["msg"] = "No tienes permisos suficientes";
