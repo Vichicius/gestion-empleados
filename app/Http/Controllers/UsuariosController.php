@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use app\Models\User;
+use Exception;
 
 class UsuariosController extends Controller
 {
