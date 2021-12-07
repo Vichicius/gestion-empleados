@@ -21,6 +21,8 @@ Route::middleware(["validar_permiso"])->group(function () {
         Route::get('login', [controladorUsuarios::class, 'register']);
         Route::get('register', [controladorUsuarios::class, 'login'])->withoutMiddleware("validar_permiso"); //quitar la validacion del middleware
         Route::get('forgot-password', [controladorUsuarios::class, 'passRecovery'])->withoutMiddleware("validar_permiso");
+        Route::get('list', [controladorUsuarios::class, 'employeeList']);
+        Route::get('details/{$id}', [controladorUsuarios::class, 'employeeDetails']);
     });
 
 });

@@ -23,9 +23,11 @@ class checkUserProfile
         Si es RRHH o directivo return next y le paso el usuario
         si es empleado return response con un error
         */
+        $jdata = $request->getContent();
+        $data = json_decode($jdata);
         $response = "";
         try{
-            $userMiddleware = User::where('api_token')->first();
+            $userMiddleware = User::where('api_token', $data->api_token)->first();
             switch ($userMiddleware->puesto) {
                 case 'empleado':
                     $permiso = 1;
@@ -41,7 +43,9 @@ class checkUserProfile
                     break;
             }
             if($permiso>=2){
-                return $next($userMiddleware,$permiso);
+                $request->attributes->add(['userMiddleware' => $userMiddleware]);
+                $request->attributes->add(['permiso' => $permiso]);
+                return $next($request);
             }else{
                 $response["status"] = 0;
                 $response["msg"] = "No tienes permisos suficientes";

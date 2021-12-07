@@ -40,7 +40,9 @@ class UsuariosController extends Controller
             $response["status"]=0;
             $response["msg"]="introduce name, email, password, puesto, salario, biografia";
         }
-        // $response["pruebas"] = $permiso;
+
+        //pruebas
+        $response["pruebas"] = $req->permiso;
     }
     public function login(Request $req){
         $jdata = $req->getContent();
@@ -97,5 +99,39 @@ class UsuariosController extends Controller
         return $response;
 
     }
+
+    public function employeeList(Request $req){
+        $jdata = $req->getContent();
+        $data = json_decode($jdata);
+        
+        /*
+        Muestra Nombre, puesto, salario
+        De los que tienen menos permisos que el que lo mira
+        los de rango 1 no pueden (empleados)
+        */
+
+        $empleados = User::where('puesto',"empleado")->get();
+        $i = 1; //utilizo i en vez de key porque si no se sobreescribe al introducir los de RRHH
+        foreach ($empleados as $key => $empleado) {
+            $response[$i]["Nombre"] = $empleado->name;
+            $response[$i]["Puesto"] = $empleado->puesto;
+            $response[$i]["Salario"] = $empleado->salario;
+            $i++;
+        }
+        if($req->get("permiso") >2 ){//si su permiso es mayor que RRHH
+            $empleados = User::where('puesto',"RRHH")->get();
+            foreach ($empleados as $key => $empleado) {
+                $response[$i]["Nombre"] = $empleado->name;
+                $response[$i]["Puesto"] = $empleado->puesto;
+                $response[$i]["Salario"] = $empleado->salario;
+                $i++;
+            }
+        }
+
+        return $response;
+
+    }
+
+    
     
 }
