@@ -132,6 +132,46 @@ class UsuariosController extends Controller
 
     }
 
-    
+    public function employeeDetails(Request $req, int $id){
+        $jdata = $req->getContent();
+        $data = json_decode($jdata);
+        
+        /*
+        Muestra Nombre, email, puesto, biografía, salario
+        De los que tienen menos permisos que el que lo mira
+        los de rango 1 no pueden (empleados)
+        */
+
+        $empleado = User::find($id);
+        if($empleado){
+            switch ($empleado->puesto) {
+                case 'empleado':
+                    $permisoDelID = 1;
+                    break;
+                case 'RRHH':
+                    $permisoDelID = 2;
+                    break;
+                case 'directivo':
+                    $permisoDelID = 3;
+                    break;
+                default:
+                    $permisoDelID = 0;
+                    break;
+            }
+            if($req->get("permiso") < $permisoDelID){
+                $response["Nombre"] = $empleado->name;
+                $response["Email"] = $empleado->email;
+                $response["Puesto"] = $empleado->puesto;
+                $response["Biografía"] = $empleado->biografia;
+                $response["Salario"] = $empleado->salario;
+            }else{
+                $response["status"] = 0;
+                $response["msg"] = "No tienes permisos suficientes para ver los detalles de esta persona";
+            }
+        }
+        
+        return $response;
+
+    }
     
 }
