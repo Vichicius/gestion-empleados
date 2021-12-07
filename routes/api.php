@@ -24,6 +24,7 @@ Route::middleware(["validar_permiso"])->group(function () {
         Route::get('list', [controladorUsuarios::class, 'employeeList']);
         Route::get('details/{$id}', [controladorUsuarios::class, 'employeeDetails']);
         Route::get('profile', [controladorUsuarios::class, 'viewOwnProfile']);
+        Route::get('edit', [controladorUsuarios::class, 'editEmployee']);
     });
 
 });

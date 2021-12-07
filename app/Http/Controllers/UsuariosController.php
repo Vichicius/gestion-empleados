@@ -41,9 +41,10 @@ class UsuariosController extends Controller
             $response["msg"]="introduce name, email, password, puesto, salario, biografia";
         }
 
-        //pruebas
-        $response["pruebas"] = $req->permiso;
+        
+        return response()->json($response);
     }
+
     public function login(Request $req){
         $jdata = $req->getContent();
         $data = json_decode($jdata);
@@ -96,8 +97,7 @@ class UsuariosController extends Controller
             $response["status"] = 0;
             $response["msg"] = "No se encuentra el email";
         }
-        return $response;
-
+        return response()->json($response);
     }
 
     public function employeeList(Request $req){
@@ -128,7 +128,7 @@ class UsuariosController extends Controller
             }
         }
 
-        return $response;
+        return response()->json($response);
 
     }
 
@@ -170,8 +170,7 @@ class UsuariosController extends Controller
             }
         }
         
-        return $response;
-
+        return response()->json($response);
     }
 
     public function viewOwnProfile(Request $req){
@@ -194,8 +193,67 @@ class UsuariosController extends Controller
             $response["status"] = 0;
             $response["msg"] = "No has iniciado sesion (falta api_token)";
         }
-        return $response;
+        return response()->json($response);
 
     }
     
+    public function editEmployee(Request $req){
+        $jdata = $req->getContent();
+        $data = json_decode($jdata);
+        
+        /*
+            Editar Nombre, Email, puesto, Biografía, salario, password
+            De los que tienen menos permisos que él o se puede editar a él mismo.
+        */
+
+        //saber id del editor
+        //saber id del editado mediante su email
+
+        //comparar permisos
+
+        //hacer los cambios y guardarlos
+
+        $editor = $req->get("userMiddleware");
+        $editado = User::where('email',$data->email)->first();
+
+        if($editor && $editado){
+            switch ($editado->puesto) {
+                case 'empleado':
+                    $permisoDelEditado = 1;
+                    break;
+                case 'RRHH':
+                    $permisoDelEditado = 2;
+                    break;
+                case 'directivo':
+                    $permisoDelEditado = 3;
+                    break;
+                default:
+                    $permisoDelEditado = 0;
+                    break;
+            }
+            if($editor->id == $editado->id || $req->get("permiso") >  $permisoDelEditado){ //pasa si se intenta editar a si mismo o a alguien con menos permisos
+                if(isset($editado->name)) $editado->name = $data->name;
+                if(isset($editado->email)) $editado->email = $data->email;
+                if(isset($editado->puesto)) $editado->puesto = $data->puesto;
+                if(isset($editado->biografia)) $editado->biografia = $data->biografia;
+                if(isset($editado->salario)) $editado->salario = $data->salario;
+                if(isset($editado->password)) $editado->password = $data->password;
+                $editado->save();
+
+                $response["status"] = 1;
+                $response["msg"] = "Usuario editado correctamente";
+                $response["user"] = $editado;
+
+            }else{
+                $response["status"] = 0;
+                $response["msg"] = "No tienes permisos suficientes";
+            }
+        }else{
+            $response["status"] = 0;
+            $response["msg"] = "No se encuentra a algun empleado";
+
+        }
+        return response()->json($response);
+
+    }
 }
