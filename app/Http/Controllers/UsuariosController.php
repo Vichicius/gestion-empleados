@@ -173,5 +173,29 @@ class UsuariosController extends Controller
         return $response;
 
     }
+
+    public function viewOwnProfile(Request $req){
+        $jdata = $req->getContent();
+        $data = json_decode($jdata);
+        
+        /*
+            Muestra Nombre, Email, puesto, Biografía, salario
+            Del mismo usuario que accede
+        */
+
+        $user = User::where('api_token', $data->api_token);
+        if($user){
+            $response["Nombre"] = $user->name;
+            $response["Email"] = $user->email;
+            $response["Puesto"] = $user->puesto;
+            $response["Biografía"] = $user->biografia;
+            $response["Salario"] = $user->salario;
+        }else{
+            $response["status"] = 0;
+            $response["msg"] = "No has iniciado sesion (falta api_token)";
+        }
+        return $response;
+
+    }
     
 }

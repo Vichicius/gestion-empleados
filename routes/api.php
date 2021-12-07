@@ -23,6 +23,7 @@ Route::middleware(["validar_permiso"])->group(function () {
         Route::get('forgot-password', [controladorUsuarios::class, 'passRecovery'])->withoutMiddleware("validar_permiso");
         Route::get('list', [controladorUsuarios::class, 'employeeList']);
         Route::get('details/{$id}', [controladorUsuarios::class, 'employeeDetails']);
+        Route::get('profile', [controladorUsuarios::class, 'viewOwnProfile']);
     });
 
 });
