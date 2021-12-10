@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use app\Models\User;
+use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\OrderShipped;
 use Illuminate\Support\Str;
+
 
 class UsuariosController extends Controller
 {
@@ -55,6 +58,15 @@ class UsuariosController extends Controller
         if($user){
             //comprobar que está bien la contraseña
             if(Hash::check($data->password, $user->password)){
+                //
+                //
+                //IMPORTANTE
+                //
+                //sacar un array de todos los apitokens y hacer un dowhile de generar el hash
+                //
+                //
+                //
+                //
                 $user->api_token = Hash::make(now().$user->email);
                 $user->save();
                 $response["status"] = 1;
@@ -68,7 +80,7 @@ class UsuariosController extends Controller
             $response["status"] = 0;
             $response["msg"] = "No se encuentra el email";
         }
-        return $response;
+        return response()->json($response);
 
         
     }
@@ -84,11 +96,14 @@ class UsuariosController extends Controller
         se la envio por email
         */
 
-        $user = User::where('email',$data->email);
+        $user = User::where('email',$data->email)->first();
         if($user){
             $newPass = Str::random(16);
-            $user->password = Hash::create($newPass);
+            $user->password = Hash::make($newPass); //hacerla temporal    
             $user->save();
+            Mail::to($user->email)->send(new OrderShipped (
+                $newPass
+            ));
             $response["status"] = 1;
             $response["msg"] = "Se ha cambiado la contraseña";
             $response["contenido del email"] = "La contraseña es: ".$newPass;
@@ -103,7 +118,7 @@ class UsuariosController extends Controller
     public function employeeList(Request $req){
         $jdata = $req->getContent();
         $data = json_decode($jdata);
-        
+        $response = "";
         /*
         Muestra Nombre, puesto, salario
         De los que tienen menos permisos que el que lo mira
@@ -118,7 +133,7 @@ class UsuariosController extends Controller
             $response[$i]["Salario"] = $empleado->salario;
             $i++;
         }
-        if($req->get("permiso") >2 ){//si su permiso es mayor que RRHH
+        if($req->get("permiso") > 2 ){//si su permiso es mayor que RRHH
             $empleados = User::where('puesto',"RRHH")->get();
             foreach ($empleados as $key => $empleado) {
                 $response[$i]["Nombre"] = $empleado->name;
@@ -135,7 +150,7 @@ class UsuariosController extends Controller
     public function employeeDetails(Request $req, int $id){
         $jdata = $req->getContent();
         $data = json_decode($jdata);
-        
+
         /*
         Muestra Nombre, email, puesto, biografía, salario
         De los que tienen menos permisos que el que lo mira
@@ -158,7 +173,7 @@ class UsuariosController extends Controller
                     $permisoDelID = 0;
                     break;
             }
-            if($req->get("permiso") < $permisoDelID){
+            if($req->get("permiso") > $permisoDelID){
                 $response["Nombre"] = $empleado->name;
                 $response["Email"] = $empleado->email;
                 $response["Puesto"] = $empleado->puesto;
@@ -168,6 +183,9 @@ class UsuariosController extends Controller
                 $response["status"] = 0;
                 $response["msg"] = "No tienes permisos suficientes para ver los detalles de esta persona";
             }
+        }else{
+            $response["status"] = 0;
+            $response["msg"] = "No se encuentra el empleado";
         }
         
         return response()->json($response);
@@ -182,7 +200,9 @@ class UsuariosController extends Controller
             Del mismo usuario que accede
         */
 
-        $user = User::where('api_token', $data->api_token);
+        //$user = User::where('api_token', $data->api_token);
+
+        $user = $req->get("userMiddleware");
         if($user){
             $response["Nombre"] = $user->name;
             $response["Email"] = $user->email;
@@ -190,6 +210,7 @@ class UsuariosController extends Controller
             $response["Biografía"] = $user->biografia;
             $response["Salario"] = $user->salario;
         }else{
+            //si va bien el middleware nunca deberia llegar aqui pero por si acaso
             $response["status"] = 0;
             $response["msg"] = "No has iniciado sesion (falta api_token)";
         }
@@ -217,37 +238,43 @@ class UsuariosController extends Controller
         $editado = User::where('email',$data->email)->first();
 
         if($editor && $editado){
-            switch ($editado->puesto) {
-                case 'empleado':
-                    $permisoDelEditado = 1;
-                    break;
-                case 'RRHH':
-                    $permisoDelEditado = 2;
-                    break;
-                case 'directivo':
-                    $permisoDelEditado = 3;
-                    break;
-                default:
-                    $permisoDelEditado = 0;
-                    break;
-            }
-            if($editor->id == $editado->id || $req->get("permiso") >  $permisoDelEditado){ //pasa si se intenta editar a si mismo o a alguien con menos permisos
-                if(isset($editado->name)) $editado->name = $data->name;
-                if(isset($editado->email)) $editado->email = $data->email;
-                if(isset($editado->puesto)) $editado->puesto = $data->puesto;
-                if(isset($editado->biografia)) $editado->biografia = $data->biografia;
-                if(isset($editado->salario)) $editado->salario = $data->salario;
-                if(isset($editado->password)) $editado->password = $data->password;
-                $editado->save();
-
-                $response["status"] = 1;
-                $response["msg"] = "Usuario editado correctamente";
-                $response["user"] = $editado;
-
-            }else{
+            try{
+                switch ($editado->puesto) {
+                    case 'empleado':
+                        $permisoDelEditado = 1;
+                        break;
+                    case 'RRHH':
+                        $permisoDelEditado = 2;
+                        break;
+                    case 'directivo':
+                        $permisoDelEditado = 3;
+                        break;
+                    default:
+                        $permisoDelEditado = 0;
+                        break;
+                }
+                if($editor->id == $editado->id || $req->get("permiso") >  $permisoDelEditado){ //pasa si se intenta editar a si mismo o a alguien con menos permisos
+                    if(isset($editado->name)) $editado->name = $data->name;
+                    if(isset($editado->email)) $editado->email = $data->email;
+                    if(isset($editado->puesto)) $editado->puesto = $data->puesto;
+                    if(isset($editado->biografia)) $editado->biografia = $data->biografia;
+                    if(isset($editado->salario)) $editado->salario = $data->salario;
+                    if(isset($editado->password)) $editado->password = $data->password;
+                    $editado->save();
+    
+                    $response["status"] = 1;
+                    $response["msg"] = "Usuario editado correctamente";
+                    $response["user"] = $editado;
+    
+                }else{
+                    $response["status"] = 0;
+                    $response["msg"] = "No tienes permisos suficientes";
+                }
+            }catch(\Exception $e){
                 $response["status"] = 0;
-                $response["msg"] = "No tienes permisos suficientes";
+                $response["msg"]="Error: ".$e;
             }
+            
         }else{
             $response["status"] = 0;
             $response["msg"] = "No se encuentra a algun empleado";

@@ -19,7 +19,7 @@ class CreateUsersTable extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('puesto');
+            $table->enum('puesto', ['empleado', 'RRHH', 'directivo']);
             $table->integer('salario');
             $table->string('biografia');
             $table->string('api_token')->unique()->nullable();
