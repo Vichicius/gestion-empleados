@@ -23,6 +23,7 @@ class CreateUsersTable extends Migration
             $table->integer('salario');
             $table->string('biografia');
             $table->string('api_token')->unique()->nullable();
+            $table->string('last_login')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });

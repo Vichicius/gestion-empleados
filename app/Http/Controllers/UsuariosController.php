@@ -68,6 +68,7 @@ class UsuariosController extends Controller
                 //
                 //
                 $user->api_token = Hash::make(now().$user->email);
+                $user->last_login = new DateTime('now');
                 $user->save();
                 $response["status"] = 1;
                 $response["msg"] = "sesion iniciada";
@@ -282,5 +283,19 @@ class UsuariosController extends Controller
         }
         return response()->json($response);
 
+    }
+
+    public function checkIfTokenExpired(User $user){
+
+        $lastlogin = $user->last_login;
+        date_add(new DateInterval('P3D'), $lastlogin);
+        $now = new DateTime('now');
+
+        if($now){
+            
+            return true;
+        }else{
+            return false;
+        }
     }
 }
