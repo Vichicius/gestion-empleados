@@ -22,9 +22,10 @@ Route::middleware(["validar_permiso", "validar_token"])->group(function () {
         Route::put('login', [controladorUsuarios::class, 'login'])->withoutMiddleware(["validar_permiso", "validar_token"]); //quitar la validacion del middleware
         Route::put('forgot-password', [controladorUsuarios::class, 'passRecovery'])->withoutMiddleware(["validar_permiso", "validar_token"]);
         Route::get('list', [controladorUsuarios::class, 'employeeList']);
-        Route::get('details/{$id}', [controladorUsuarios::class, 'employeeDetails']);
+        Route::put('details', [controladorUsuarios::class, 'employeeDetails']);
         Route::get('profile', [controladorUsuarios::class, 'viewOwnProfile']);
         Route::put('edit', [controladorUsuarios::class, 'editEmployee']);
+        Route::put('prueba', [controladorUsuarios::class, 'prueba'])->withoutMiddleware(["validar_permiso", "validar_token"]);;
     });
 
 });

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Exception;
+use DateTime;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\OrderShipped;
@@ -14,7 +15,7 @@ use Illuminate\Support\Str;
 class UsuariosController extends Controller
 {
     //
-    public function register(Request $req){
+    public function register(Request $req){ //Pide: api_token, name, email, password, puesto, salario y biografia
         $jdata = $req->getContent();
         $data = json_decode($jdata);
 
@@ -23,10 +24,13 @@ class UsuariosController extends Controller
                 $user = new User;
                 $user->name = $data->name;
                 $user->email = $data->email;
-                if(preg_match("^/(?=.*[a-z)(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{6,}/", $data->password)){
+                if(preg_match("/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{6,}/", $data->password)){
                     $user->password = Hash::make($data->password);
                 }else{
-                    throw new Exception('Contraseña insegura.');
+                    $response["status"]=0;
+                    $response["msg"]="Contraseña insegura. Mínimo: 1 Mayúscula, 1 minúscula, 1 caracter especial y 1 número";
+                    return response()->json($response);
+                    //throw new Exception('Contraseña insegura.');
                 }
                 $user->puesto = $data->puesto;
                 $user->salario = $data->salario;
@@ -48,7 +52,7 @@ class UsuariosController extends Controller
         return response()->json($response);
     }
 
-    public function login(Request $req){
+    public function login(Request $req){ //Pide: email y password
         $jdata = $req->getContent();
         $data = json_decode($jdata);
 
@@ -58,16 +62,13 @@ class UsuariosController extends Controller
         if($user){
             //comprobar que está bien la contraseña
             if(Hash::check($data->password, $user->password)){
-                //
-                //
-                //IMPORTANTE
-                //
-                //sacar un array de todos los apitokens y hacer un dowhile de generar el hash
-                //
-                //
-                //
-                //
-                $user->api_token = Hash::make(now().$user->email);
+                
+                $allTokens = $tokens = User::pluck('api_token')->toArray();
+
+                do {
+                    $user->api_token = Hash::make(now().$user->email);
+                } while (in_array($user->api_token, $allTokens)); //En bucle mientras que el apitoken esté duplicado
+                
                 $user->last_login = new DateTime('now');
                 $user->save();
                 $response["status"] = 1;
@@ -86,7 +87,7 @@ class UsuariosController extends Controller
         
     }
 
-    public function passRecovery(Request $req){
+    public function passRecovery(Request $req){//Pide: email
         $jdata = $req->getContent();
         $data = json_decode($jdata);
         
@@ -116,10 +117,10 @@ class UsuariosController extends Controller
         return response()->json($response);
     }
 
-    public function employeeList(Request $req){
+    public function employeeList(Request $req){//Pide: api_token
         $jdata = $req->getContent();
         $data = json_decode($jdata);
-        $response = "";
+        
         /*
         Muestra Nombre, puesto, salario
         De los que tienen menos permisos que el que lo mira
@@ -148,7 +149,7 @@ class UsuariosController extends Controller
 
     }
 
-    public function employeeDetails(Request $req, int $id){
+    public function employeeDetails(Request $req){//Pide: api_token y id (del empleado)
         $jdata = $req->getContent();
         $data = json_decode($jdata);
 
@@ -158,7 +159,7 @@ class UsuariosController extends Controller
         los de rango 1 no pueden (empleados)
         */
 
-        $empleado = User::find($id);
+        $empleado = User::find($data->id);
         if($empleado){
             switch ($empleado->puesto) {
                 case 'empleado':
@@ -192,7 +193,7 @@ class UsuariosController extends Controller
         return response()->json($response);
     }
 
-    public function viewOwnProfile(Request $req){
+    public function viewOwnProfile(Request $req){//Pide: api_token
         $jdata = $req->getContent();
         $data = json_decode($jdata);
         
@@ -219,7 +220,7 @@ class UsuariosController extends Controller
 
     }
     
-    public function editEmployee(Request $req){
+    public function editEmployee(Request $req){//Pide: api_token, emailEmpleado y los campos a editar del empleado
         $jdata = $req->getContent();
         $data = json_decode($jdata);
         
@@ -236,7 +237,7 @@ class UsuariosController extends Controller
         //hacer los cambios y guardarlos
 
         $editor = $req->get("userMiddleware");
-        $editado = User::where('email',$data->email)->first();
+        $editado = User::where('email',$data->emailEmpleado)->first();
 
         if($editor && $editado){
             try{
@@ -255,12 +256,12 @@ class UsuariosController extends Controller
                         break;
                 }
                 if($editor->id == $editado->id || $req->get("permiso") >  $permisoDelEditado){ //pasa si se intenta editar a si mismo o a alguien con menos permisos
-                    if(isset($editado->name)) $editado->name = $data->name;
-                    if(isset($editado->email)) $editado->email = $data->email;
-                    if(isset($editado->puesto)) $editado->puesto = $data->puesto;
-                    if(isset($editado->biografia)) $editado->biografia = $data->biografia;
-                    if(isset($editado->salario)) $editado->salario = $data->salario;
-                    if(isset($editado->password)) $editado->password = $data->password;
+                    if(isset($data->name)) $editado->name = $data->name;
+                    if(isset($data->email)) $editado->email = $data->email;
+                    if(isset($data->puesto)) $editado->puesto = $data->puesto;
+                    if(isset($data->biografia)) $editado->biografia = $data->biografia;
+                    if(isset($data->salario)) $editado->salario = $data->salario;
+                    if(isset($data->password)) $editado->password = $data->password;
                     $editado->save();
     
                     $response["status"] = 1;
@@ -278,7 +279,7 @@ class UsuariosController extends Controller
             
         }else{
             $response["status"] = 0;
-            $response["msg"] = "No se encuentra a algun empleado";
+            $response["msg"] = "No se encuentra el email del empleado";
 
         }
         return response()->json($response);

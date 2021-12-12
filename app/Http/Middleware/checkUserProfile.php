@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use app\Models\User;
+use App\Models\User;
 use Exception;
 
 class checkUserProfile

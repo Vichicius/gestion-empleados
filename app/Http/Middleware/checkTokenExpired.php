@@ -4,6 +4,9 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Exception;
+use DateTime;
+use DateInterval;
 
 class checkTokenExpired
 {
@@ -22,8 +25,8 @@ class checkTokenExpired
         try{
 
             $user = $request->get('userMiddleware');
-            $lastlogin = $user->last_login;
-            $tokenExpiration = date_add(new DateInterval('P1D'), $lastlogin);
+            $lastlogin = new DateTime($user->last_login);
+            $tokenExpiration = date_add($lastlogin, new DateInterval('P1D'));
             $now = new DateTime('now');
 
             if($tokenExpiration > $now){ //Si no ha caducado el token:
