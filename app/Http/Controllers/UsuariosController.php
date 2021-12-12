@@ -285,14 +285,15 @@ class UsuariosController extends Controller
 
     }
 
-    public function checkIfTokenExpired(User $user){
+    public function checkIfTokenExpired(User $user, $response){
 
         $lastlogin = $user->last_login;
-        date_add(new DateInterval('P3D'), $lastlogin);
+        $tokenExpiration = date_add(new DateInterval('P1D'), $lastlogin);
         $now = new DateTime('now');
 
-        if($now){
-            
+        if($tokenExpiration > $now){
+            $response["prueba del token1"] = "entra al true";
+            $response["prueba del token2"] = [$lastlogin, $tokenExpiration];
             return true;
         }else{
             return false;

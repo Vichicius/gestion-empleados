@@ -16,7 +16,7 @@ use App\Http\Controllers\UsuariosController as controladorUsuarios;
 |
 */
 
-Route::middleware(["validar_permiso"])->group(function () {
+Route::middleware(["validar_permiso", "validar_token"])->group(function () {
     Route::prefix('users')->group(function(){
         Route::post('register', [controladorUsuarios::class, 'register']);
         Route::put('login', [controladorUsuarios::class, 'login'])->withoutMiddleware("validar_permiso"); //quitar la validacion del middleware
