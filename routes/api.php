@@ -19,8 +19,8 @@ use App\Http\Controllers\UsuariosController as controladorUsuarios;
 Route::middleware(["validar_permiso", "validar_token"])->group(function () {
     Route::prefix('users')->group(function(){
         Route::post('register', [controladorUsuarios::class, 'register']);
-        Route::put('login', [controladorUsuarios::class, 'login'])->withoutMiddleware("validar_permiso"); //quitar la validacion del middleware
-        Route::put('forgot-password', [controladorUsuarios::class, 'passRecovery'])->withoutMiddleware("validar_permiso");
+        Route::put('login', [controladorUsuarios::class, 'login'])->withoutMiddleware(["validar_permiso", "validar_token"]); //quitar la validacion del middleware
+        Route::put('forgot-password', [controladorUsuarios::class, 'passRecovery'])->withoutMiddleware(["validar_permiso", "validar_token"]);
         Route::get('list', [controladorUsuarios::class, 'employeeList']);
         Route::get('details/{$id}', [controladorUsuarios::class, 'employeeDetails']);
         Route::get('profile', [controladorUsuarios::class, 'viewOwnProfile']);
