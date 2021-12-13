@@ -202,8 +202,6 @@ class UsuariosController extends Controller
             Del mismo usuario que accede
         */
 
-        //$user = User::where('api_token', $data->api_token);
-
         $user = $req->get("userMiddleware");
         if($user){
             $response["Nombre"] = $user->name;
@@ -212,7 +210,6 @@ class UsuariosController extends Controller
             $response["Biografía"] = $user->biografia;
             $response["Salario"] = $user->salario;
         }else{
-            //si va bien el middleware nunca deberia llegar aqui pero por si acaso
             $response["status"] = 0;
             $response["msg"] = "No has iniciado sesion (falta api_token)";
         }

@@ -23,7 +23,7 @@ Route::middleware(["validar_permiso", "validar_token"])->group(function () {
         Route::put('forgot-password', [controladorUsuarios::class, 'passRecovery'])->withoutMiddleware(["validar_permiso", "validar_token"]);
         Route::get('list', [controladorUsuarios::class, 'employeeList']);
         Route::put('details', [controladorUsuarios::class, 'employeeDetails']);
-        Route::get('profile', [controladorUsuarios::class, 'viewOwnProfile']);
+        Route::get('profile', [controladorUsuarios::class, 'viewOwnProfile'])->withoutMiddleware(["validar_permiso"]);;
         Route::put('edit', [controladorUsuarios::class, 'editEmployee']);
         Route::put('prueba', [controladorUsuarios::class, 'prueba'])->withoutMiddleware(["validar_permiso", "validar_token"]);;
     });

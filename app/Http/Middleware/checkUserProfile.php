@@ -25,7 +25,7 @@ class checkUserProfile
         */
         $jdata = $request->getContent();
         $data = json_decode($jdata);
-        $response = "";
+        
         try{
             $userMiddleware = User::where('api_token', $data->api_token)->first();
             switch ($userMiddleware->puesto) {
@@ -55,7 +55,7 @@ class checkUserProfile
             $response["msg"] = "No has iniciado sesión";
             $response["Exception"] = $e;
         }
-        return $response;
+        return response()->json($response);
         
     }
 }
