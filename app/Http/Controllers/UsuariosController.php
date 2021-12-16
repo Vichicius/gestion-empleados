@@ -256,7 +256,8 @@ class UsuariosController extends Controller
                         $permisoDelEditado = 0;
                         break;
                 }
-                if($editor->id == $editado->id || $req->get("permiso") >  $permisoDelEditado){ //pasa si se intenta editar a si mismo o a alguien con menos permisos
+                //pasa si se intenta editar a alguien con menos permisos o si se intenta editar un directivo a él mismo
+                if( ($editor->id == $editado->id && $req->get("permiso") == 3) || $req->get("permiso") >  $permisoDelEditado){ 
                     if(isset($data->name)) $editado->name = $data->name;
                     if(isset($data->email)) $editado->email = $data->email;
                     if(isset($data->puesto)) $editado->puesto = $data->puesto;
