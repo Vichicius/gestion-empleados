@@ -130,6 +130,7 @@ class UsuariosController extends Controller
         $empleados = User::where('puesto',"empleado")->get();
         $i = 1; //utilizo i en vez de key porque si no se sobreescribe al introducir los de RRHH
         foreach ($empleados as $key => $empleado) {
+            $response[$i]["id"] = $empleado->id;
             $response[$i]["Nombre"] = $empleado->name;
             $response[$i]["Puesto"] = $empleado->puesto;
             $response[$i]["Salario"] = $empleado->salario;
@@ -138,6 +139,7 @@ class UsuariosController extends Controller
         if($req->get("permiso") > 2 ){//si su permiso es mayor que RRHH
             $empleados = User::where('puesto',"RRHH")->get();
             foreach ($empleados as $key => $empleado) {
+                $response[$i]["id"] = $empleado->id;
                 $response[$i]["Nombre"] = $empleado->name;
                 $response[$i]["Puesto"] = $empleado->puesto;
                 $response[$i]["Salario"] = $empleado->salario;
@@ -176,6 +178,7 @@ class UsuariosController extends Controller
                     break;
             }
             if($req->get("permiso") > $permisoDelID){
+                $response["id"] = $empleado->id;
                 $response["Nombre"] = $empleado->name;
                 $response["Email"] = $empleado->email;
                 $response["Puesto"] = $empleado->puesto;
@@ -204,6 +207,7 @@ class UsuariosController extends Controller
 
         $user = $req->get("userMiddleware");
         if($user){
+            $response["id"] = $user->id;
             $response["Nombre"] = $user->name;
             $response["Email"] = $user->email;
             $response["Puesto"] = $user->puesto;
