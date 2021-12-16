@@ -63,7 +63,7 @@ class UsuariosController extends Controller
             //comprobar que está bien la contraseña
             if(Hash::check($data->password, $user->password)){
                 
-                $allTokens = $tokens = User::pluck('api_token')->toArray();
+                $allTokens = User::pluck('api_token')->toArray();
 
                 do {
                     $user->api_token = Hash::make(now().$user->email);
