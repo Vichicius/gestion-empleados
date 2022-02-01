@@ -35,6 +35,14 @@ class UsuariosController extends Controller
                 $user->puesto = $data->puesto;
                 $user->salario = $data->salario;
                 $user->biografia = $data->biografia;
+                
+                $allTokens = User::pluck('api_token')->toArray();
+
+                do {
+                    $user->api_token = Hash::make(now().$user->email);
+                } while (in_array($user->api_token, $allTokens)); //En bucle mientras que el apitoken esté duplicado
+                
+                $user->last_login = new DateTime('now');
                 $user->save();
                 $response["status"]=1;
                 $response["msg"]="Guardado con éxito";
