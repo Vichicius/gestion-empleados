@@ -73,7 +73,7 @@ class UsuariosController extends Controller
                 $user->save();
                 $response["status"] = 1;
                 $response["msg"] = "sesion iniciada";
-                $response["user"] = $user;
+                $response["api_token"] = $user->api_token;
             }else{
                 $response["status"] = 0;
                 $response["msg"] = "Contraseña incorrecta";
