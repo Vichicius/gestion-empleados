@@ -24,24 +24,24 @@ class UsuariosController extends Controller
                 $user = new User;
                 $user->name = $data->name;
                 $user->email = $data->email;
-                if(preg_match("/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{6,}/", $data->password)){
+                if(preg_match("/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{6,}/", $data->password)){
                     $user->password = Hash::make($data->password);
                 }else{
                     $response["status"]=0;
-                    $response["msg"]="Contraseña insegura. Mínimo: 1 Mayúscula, 1 minúscula, 1 caracter especial y 1 número";
+                    $response["msg"]="Contraseña insegura. Mínimo: 1 Mayúscula, 1 minúscula y 1 número (6 de longitud)";
                     return response()->json($response);
                     //throw new Exception('Contraseña insegura.');
                 }
                 $user->puesto = $data->puesto;
                 $user->salario = $data->salario;
                 $user->biografia = $data->biografia;
-                
+
                 $allTokens = User::pluck('api_token')->toArray();
 
                 do {
                     $user->api_token = Hash::make(now().$user->email);
                 } while (in_array($user->api_token, $allTokens)); //En bucle mientras que el apitoken esté duplicado
-                
+
                 $user->last_login = new DateTime('now');
                 $user->save();
                 $response["status"]=1;
@@ -50,13 +50,13 @@ class UsuariosController extends Controller
                 $response["status"]=0;
                 $response["msg"]="Error al intentar guardar el usuario: ".$e;
             }
-            
+
         }else{
             $response["status"]=0;
             $response["msg"]="introduce name, email, password, puesto, salario, biografia";
         }
 
-        
+
         return response()->json($response);
     }
 
@@ -70,13 +70,13 @@ class UsuariosController extends Controller
         if($user){
             //comprobar que está bien la contraseña
             if(Hash::check($data->password, $user->password)){
-                
+
                 $allTokens = User::pluck('api_token')->toArray();
 
                 do {
                     $user->api_token = Hash::make(now().$user->email);
                 } while (in_array($user->api_token, $allTokens)); //En bucle mientras que el apitoken esté duplicado
-                
+
                 $user->last_login = new DateTime('now');
                 $user->save();
                 $response["status"] = 1;
@@ -92,13 +92,13 @@ class UsuariosController extends Controller
         }
         return response()->json($response);
 
-        
+
     }
 
     public function passRecovery(Request $req){//Pide: email
         $jdata = $req->getContent();
         $data = json_decode($jdata);
-        
+
         /*me pasa el email
         pillo el usuario
         le cambio la contraseña a un hash aleatorio
@@ -109,7 +109,7 @@ class UsuariosController extends Controller
         $user = User::where('email',$data->email)->first();
         if($user){
             $newPass = Str::random(16);
-            $user->password = Hash::make($newPass); //hacerla temporal    
+            $user->password = Hash::make($newPass); //hacerla temporal
             $user->save();
             Mail::to($user->email)->send(new OrderShipped (
                 $newPass
@@ -128,7 +128,7 @@ class UsuariosController extends Controller
     public function employeeList(Request $req){//Pide: api_token
         $jdata = $req->getContent();
         $data = json_decode($jdata);
-        
+
         /*
         Muestra Nombre, puesto, salario
         De los que tienen menos permisos que el que lo mira
@@ -200,14 +200,14 @@ class UsuariosController extends Controller
             $response["status"] = 0;
             $response["msg"] = "No se encuentra el empleado";
         }
-        
+
         return response()->json($response);
     }
 
     public function viewOwnProfile(Request $req){//Pide: api_token
         $jdata = $req->getContent();
         $data = json_decode($jdata);
-        
+
         /*
             Muestra Nombre, Email, puesto, Biografía, salario
             Del mismo usuario que accede
@@ -228,11 +228,11 @@ class UsuariosController extends Controller
         return response()->json($response);
 
     }
-    
+
     public function editEmployee(Request $req){//Pide: api_token, emailEmpleado y los campos a editar del empleado
         $jdata = $req->getContent();
         $data = json_decode($jdata);
-        
+
         /*
             Editar Nombre, Email, puesto, Biografía, salario, password
             De los que tienen menos permisos que él o se puede editar a él mismo.
@@ -265,7 +265,7 @@ class UsuariosController extends Controller
                         break;
                 }
                 //pasa si se intenta editar a alguien con menos permisos o si se intenta editar un directivo a él mismo
-                if( ($editor->id == $editado->id && $req->get("permiso") == 3) || $req->get("permiso") >  $permisoDelEditado){ 
+                if( ($editor->id == $editado->id && $req->get("permiso") == 3) || $req->get("permiso") >  $permisoDelEditado){
                     if(isset($data->name)) $editado->name = $data->name;
                     if(isset($data->email)) $editado->email = $data->email;
                     if(isset($data->puesto)) $editado->puesto = $data->puesto;
@@ -273,11 +273,11 @@ class UsuariosController extends Controller
                     if(isset($data->salario)) $editado->salario = $data->salario;
                     if(isset($data->password)) $editado->password = $data->password;
                     $editado->save();
-    
+
                     $response["status"] = 1;
                     $response["msg"] = "Usuario editado correctamente";
                     $response["user"] = $editado;
-    
+
                 }else{
                     $response["status"] = 0;
                     $response["msg"] = "No tienes permisos suficientes";
@@ -286,7 +286,7 @@ class UsuariosController extends Controller
                 $response["status"] = 0;
                 $response["msg"]="Error: ".$e;
             }
-            
+
         }else{
             $response["status"] = 0;
             $response["msg"] = "No se encuentra el email del empleado";
