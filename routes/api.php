@@ -28,9 +28,6 @@ Route::middleware(["validar_permiso"])->group(function () {
     Route::put('details', [controladorUsuarios::class, 'employeeDetails']);
     Route::put('edit', [controladorUsuarios::class, 'editEmployee']);
 });
-
-Route::get('profile', [controladorUsuarios::class, 'viewOwnProfile']);
-
-
-    
-
+Route::middleware(["validar_token"])->group(function () {
+    Route::get('profile', [controladorUsuarios::class, 'viewOwnProfile']);
+});

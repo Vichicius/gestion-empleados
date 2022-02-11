@@ -21,13 +21,14 @@ class UsuariosController extends Controller
 
         if($data->name && $data->email && $data->password && $data->puesto && $data->salario && $data->biografia){
             try{
+                $response["status"]=0;
                 $user = new User;
                 $user->name = $data->name;
                 $user->email = $data->email;
                 if(preg_match("/(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{6,}/", $data->password)){
                     $user->password = Hash::make($data->password);
                 }else{
-                    $response["status"]=0;
+                    $response["status"]= -1;
                     $response["msg"]="Contraseña insegura. Mínimo: 1 Mayúscula, 1 minúscula y 1 número (6 de longitud)";
                     return response()->json($response);
                     //throw new Exception('Contraseña insegura.');
@@ -46,13 +47,14 @@ class UsuariosController extends Controller
                 $user->save();
                 $response["status"]=1;
                 $response["msg"]="Guardado con éxito";
+                $response["api_token"]=$user->api_token;
+                $response["puesto"]=$user->puesto;
             }catch(\Exception $e){
-                $response["status"]=0;
                 $response["msg"]="Error al intentar guardar el usuario: ".$e;
             }
 
         }else{
-            $response["status"]=0;
+            $response["status"]=-2;
             $response["msg"]="introduce name, email, password, puesto, salario, biografia";
         }
 
