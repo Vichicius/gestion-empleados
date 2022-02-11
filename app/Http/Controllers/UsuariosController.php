@@ -82,6 +82,7 @@ class UsuariosController extends Controller
                 $response["status"] = 1;
                 $response["msg"] = "sesion iniciada";
                 $response["api_token"] = $user->api_token;
+                $response["puesto"] = $user->puesto;
             }else{
                 $response["status"] = 0;
                 $response["msg"] = "Contraseña incorrecta";
