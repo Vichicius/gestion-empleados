@@ -15,7 +15,7 @@ use Illuminate\Support\Str;
 class UsuariosController extends Controller
 {
     //
-    public function register(Request $req){ //Pide: api_token, name, email, password, puesto, salario y biografia
+    public function register(Request $req){ //Pide: name, email, password, puesto, salario y biografia
         $jdata = $req->getContent();
         $data = json_decode($jdata);
 
@@ -107,22 +107,27 @@ class UsuariosController extends Controller
         se la envio por email
         */
 
-        $user = User::where('email',$data->email)->first();
-        if($user){
+        try {
+            $response["status"] = 0;
+            $user = User::where('email',$data->email)->first();
+            if(!isset($user)){
+                $response["status"] = 2;
+                throw new Exception("Email no existe");
+            }
             $newPass = Str::random(16);
             $user->password = Hash::make($newPass); //hacerla temporal
             $user->save();
-            Mail::to($user->email)->send(new OrderShipped (
-                $newPass
-            ));
+            // Mail::to($user->email)->send(new OrderShipped (
+            //     $newPass
+            // ));
             $response["status"] = 1;
             $response["msg"] = "Se ha cambiado la contraseña";
             $response["contenido del email"] = "La contraseña es: ".$newPass;
             $response["password"] = $newPass;
 
-        }else{
-            $response["status"] = 0;
-            $response["msg"] = "No se encuentra el email";
+        } catch (\Exception $e) {
+            $response["msg"] = "error".$e;
+            $response["password"] = "";
         }
         return response()->json($response);
     }
