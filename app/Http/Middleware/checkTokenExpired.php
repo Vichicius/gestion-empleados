@@ -29,14 +29,14 @@ class checkTokenExpired
             if(!isset($user)){//Por si en alguna ruta me salto el primer middleware (como en el de ver perfil propio)
                 $user = User::where('api_token', $data->api_token)->first();
                 $request->attributes->add(['userMiddleware' => $user]);
-            } 
+            }
 
             $lastlogin = new DateTime($user->last_login);
             $tokenExpiration = date_add($lastlogin, new DateInterval('P1D'));
             $now = new DateTime('now');
 
             if($tokenExpiration > $now){ //Si no ha caducado el token:
-                
+
                 return $next($request);
 
             }else{

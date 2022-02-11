@@ -16,16 +16,18 @@ use App\Http\Controllers\UsuariosController as controladorUsuarios;
 |
 */
 
-Route::middleware(["validar_permiso", "validar_token"])->group(function () {
+
+//quitado validar token para que al probar no sea muy pesado tener que estar logeando para renovar el token
+Route::middleware(["validar_permiso"])->group(function () {
     Route::prefix('users')->group(function(){
         Route::post('register', [controladorUsuarios::class, 'register']);
-        Route::put('login', [controladorUsuarios::class, 'login'])->withoutMiddleware(["validar_permiso", "validar_token"]); //quitar la validacion del middleware
-        Route::put('forgot-password', [controladorUsuarios::class, 'passRecovery'])->withoutMiddleware(["validar_permiso", "validar_token"]);
+        Route::put('login', [controladorUsuarios::class, 'login'])->withoutMiddleware(["validar_permiso"]); //quitar la validacion del middleware
+        Route::put('forgot-password', [controladorUsuarios::class, 'passRecovery'])->withoutMiddleware(["validar_permiso"]);
         Route::get('list', [controladorUsuarios::class, 'employeeList']);
         Route::put('details', [controladorUsuarios::class, 'employeeDetails']);
         Route::get('profile', [controladorUsuarios::class, 'viewOwnProfile'])->withoutMiddleware(["validar_permiso"]);;
         Route::put('edit', [controladorUsuarios::class, 'editEmployee']);
-        Route::put('prueba', [controladorUsuarios::class, 'prueba'])->withoutMiddleware(["validar_permiso", "validar_token"]);;
+        Route::put('prueba', [controladorUsuarios::class, 'prueba'])->withoutMiddleware(["validar_permiso"]);;
     });
 
 });
