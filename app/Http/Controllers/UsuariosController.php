@@ -118,6 +118,7 @@ class UsuariosController extends Controller
             $response["status"] = 1;
             $response["msg"] = "Se ha cambiado la contraseña";
             $response["contenido del email"] = "La contraseña es: ".$newPass;
+            $response["password"] = $newPass;
 
         }else{
             $response["status"] = 0;
@@ -296,5 +297,6 @@ class UsuariosController extends Controller
         return response()->json($response);
 
     }
+
 
 }
