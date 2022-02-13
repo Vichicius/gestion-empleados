@@ -49,6 +49,7 @@ class UsuariosController extends Controller
                 $response["msg"]="Guardado con éxito";
                 $response["api_token"]=$user->api_token;
                 $response["puesto"]=$user->puesto;
+                $response["id"]=$user->id;
             }catch(\Exception $e){
                 $response["msg"]="Error al intentar guardar el usuario: ".$e;
             }
@@ -85,6 +86,7 @@ class UsuariosController extends Controller
                 $response["msg"] = "sesion iniciada";
                 $response["api_token"] = $user->api_token;
                 $response["puesto"] = $user->puesto;
+                $response["id"] = $user->id;
             }else{
                 $response["status"] = 0;
                 $response["msg"] = "Contraseña incorrecta";
@@ -179,6 +181,7 @@ class UsuariosController extends Controller
         */
 
         $empleado = User::find($data->id);
+        $user = $req->get("userMiddleware");
         if($empleado){
             switch ($empleado->puesto) {
                 case 'empleado':
@@ -194,13 +197,13 @@ class UsuariosController extends Controller
                     $permisoDelID = 0;
                     break;
             }
-            if($req->get("permiso") > $permisoDelID){
+            if($req->get("permiso") > $permisoDelID || $empleado->id == $user->id){
                 $response["id"] = $empleado->id;
-                $response["Nombre"] = $empleado->name;
-                $response["Email"] = $empleado->email;
-                $response["Puesto"] = $empleado->puesto;
-                $response["Biografía"] = $empleado->biografia;
-                $response["Salario"] = $empleado->salario;
+                $response["nombre"] = $empleado->name;
+                $response["email"] = $empleado->email;
+                $response["puesto"] = $empleado->puesto;
+                $response["biografía"] = $empleado->biografia;
+                $response["salario"] = $empleado->salario;
             }else{
                 $response["status"] = 0;
                 $response["msg"] = "No tienes permisos suficientes para ver los detalles de esta persona";
