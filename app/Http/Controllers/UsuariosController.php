@@ -148,23 +148,31 @@ class UsuariosController extends Controller
 
         $empleados = User::where('puesto',"empleado")->get();
         $i = 1; //utilizo i en vez de key porque si no se sobreescribe al introducir los de RRHH
+        $array1 = [];
+        $array2 = [];
+
         foreach ($empleados as $key => $empleado) {
-            $response[$i]["id"] = $empleado->id;
-            $response[$i]["Nombre"] = $empleado->name;
-            $response[$i]["Puesto"] = $empleado->puesto;
-            $response[$i]["Salario"] = $empleado->salario;
-            $i++;
+            $array1 = [
+                "id" => $empleado->id,
+                "nombre" => $empleado->name,
+                "puesto" => $empleado->puesto,
+                "salario" => $empleado->salario
+            ];
+            array_push($array2,$array1);
         }
         if($req->get("permiso") > 2 ){//si su permiso es mayor que RRHH
             $empleados = User::where('puesto',"RRHH")->get();
             foreach ($empleados as $key => $empleado) {
-                $response[$i]["id"] = $empleado->id;
-                $response[$i]["Nombre"] = $empleado->name;
-                $response[$i]["Puesto"] = $empleado->puesto;
-                $response[$i]["Salario"] = $empleado->salario;
-                $i++;
+                $array1 = [
+                    "id" => $empleado->id,
+                    "nombre" => $empleado->name,
+                    "puesto" => $empleado->puesto,
+                    "salario" => $empleado->salario
+                ];
+                array_push($array2,$array1);
             }
         }
+        $response["usuarios"] = $array2;
 
         return response()->json($response);
 
