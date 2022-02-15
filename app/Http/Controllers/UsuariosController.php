@@ -147,9 +147,17 @@ class UsuariosController extends Controller
         */
 
         $empleados = User::where('puesto',"empleado")->get();
-        $i = 1; //utilizo i en vez de key porque si no se sobreescribe al introducir los de RRHH
+        $user = $req->get("userMiddleware");
         $array1 = [];
         $array2 = [];
+
+        $array1 = [
+            "id" => $user->id,
+            "nombre" => $user->name,
+            "puesto" => $user->puesto,
+            "salario" => $user->salario
+        ];
+        array_push($array2,$array1);
 
         foreach ($empleados as $key => $empleado) {
             $array1 = [
@@ -189,7 +197,6 @@ class UsuariosController extends Controller
         */
 
         $empleado = User::find($data->id);
-        // $empleado = $req->get("userMiddleware");
         $user = $req->get("userMiddleware");
         if($empleado){
             switch ($empleado->puesto) {

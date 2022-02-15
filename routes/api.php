@@ -24,7 +24,7 @@ Route::put('login', [controladorUsuarios::class, 'login']); //quitar la validaci
 Route::put('forgot-password', [controladorUsuarios::class, 'passRecovery']);
 
 Route::middleware(["validar_permiso"])->group(function () {
-    Route::get('list', [controladorUsuarios::class, 'employeeList']);
+    Route::put('list', [controladorUsuarios::class, 'employeeList']);
     Route::put('edit', [controladorUsuarios::class, 'editEmployee']);
 });
 Route::middleware(["validar_token"])->group(function () {
