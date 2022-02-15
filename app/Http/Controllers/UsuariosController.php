@@ -181,6 +181,7 @@ class UsuariosController extends Controller
         */
 
         $empleado = User::find($data->id);
+        // $empleado = $req->get("userMiddleware");
         $user = $req->get("userMiddleware");
         if($empleado){
             switch ($empleado->puesto) {
@@ -202,7 +203,7 @@ class UsuariosController extends Controller
                 $response["nombre"] = $empleado->name;
                 $response["email"] = $empleado->email;
                 $response["puesto"] = $empleado->puesto;
-                $response["biografía"] = $empleado->biografia;
+                $response["biografia"] = $empleado->biografia;
                 $response["salario"] = $empleado->salario;
             }else{
                 $response["status"] = 0;

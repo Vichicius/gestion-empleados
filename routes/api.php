@@ -25,9 +25,9 @@ Route::put('forgot-password', [controladorUsuarios::class, 'passRecovery']);
 
 Route::middleware(["validar_permiso"])->group(function () {
     Route::get('list', [controladorUsuarios::class, 'employeeList']);
-    Route::put('details', [controladorUsuarios::class, 'employeeDetails']);
     Route::put('edit', [controladorUsuarios::class, 'editEmployee']);
 });
 Route::middleware(["validar_token"])->group(function () {
+    Route::put('details', [controladorUsuarios::class, 'employeeDetails']);
     Route::get('profile', [controladorUsuarios::class, 'viewOwnProfile']);
 });
