@@ -34,7 +34,7 @@ class checkTokenExpired
             }
         }catch(\Exception $e){
             $response["status"] = 0;
-            $response["msg"] = $e;
+            $response["msg"] = "aaaa $e";
         }
         return response()->json($response);
 

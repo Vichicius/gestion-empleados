@@ -213,7 +213,21 @@ class UsuariosController extends Controller
                     $permisoDelID = 0;
                     break;
             }
-            if($req->get("permiso") > $permisoDelID || $empleado->id == $user->id){
+            switch ($user->puesto) {
+                case 'empleado':
+                    $permisoDelUser = 1;
+                    break;
+                case 'RRHH':
+                    $permisoDelUser = 2;
+                    break;
+                case 'directivo':
+                    $permisoDelUser = 3;
+                    break;
+                default:
+                    $permisoDelUser = 0;
+                    break;
+            }
+            if($permisoDelUser > $permisoDelID || $empleado->id == $user->id){
                 $response["id"] = $empleado->id;
                 $response["nombre"] = $empleado->name;
                 $response["email"] = $empleado->email;
